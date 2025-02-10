@@ -51,38 +51,6 @@ export var hw_wcet_cycles_per_byte: u32 align(CACHE_LINE_SIZE) = 52;
 /// for planning worst-case scenarios when hardware acceleration isn't available.
 export var sw_wcet_cycles_per_byte: u32 align(CACHE_LINE_SIZE) = 779;
 
-/// A stack-based buffer type that maintains proper cache alignment.
-///
-/// Example usage:
-/// ```zig
-/// var buf = StackAlignedBuffer(1024).init();
-/// var data = buf.slice();
-/// // data is now a cache-aligned slice of 1024 bytes
-/// ```
-fn StackAlignedBuffer(comptime size: usize) type {
-    return struct {
-        const Self = @This();
-        /// The actual buffer storage, aligned to cache line boundary
-        data: [size]u8 align(CACHE_LINE_SIZE),
-
-        /// Creates a new buffer instance. If the size is below the recommended
-        /// minimum, you'll get a warning but the buffer will still work.
-        pub fn init() Self {
-            if (size < MIN_EFFICIENT_BUFFER) {
-                print("Warning: Buffer size < {d} bytes may have higher cycles/byte\n", .{MIN_EFFICIENT_BUFFER});
-            }
-            return Self{
-                .data = undefined,
-            };
-        }
-
-        /// Returns a slice of the entire buffer.
-        pub fn slice(self: *Self) []u8 {
-            return &self.data;
-        }
-    };
-}
-
 /// The CRC32C polynomial (Castagnoli).
 const CRC32C_POLY = 0x82F63B78;
 
