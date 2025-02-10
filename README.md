@@ -1,6 +1,6 @@
 # zig-crc32c
 
-[![Zig](https://img.shields.io/badge/Zig-0.11.0-orange.svg)](https://ziglang.org)
+[![Zig](https://img.shields.io/badge/Zig-0.13.0-orange.svg)](https://ziglang.org)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
 A CRC32C (Castagnoli) implementation in Zig featuring hardware acceleration and Triple Modular Redundancy for fault tolerance. 
