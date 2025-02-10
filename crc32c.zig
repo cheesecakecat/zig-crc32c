@@ -165,7 +165,7 @@ fn hw_crc32c(init: u32, buf: []const u8) u32 {
                       [crc_in] "0" (crc),
                 );
             crc = result;
-            print(" HW Channel {d} after 8-byte chunk: 0x{x:0>8} -> 0x{x:0>8}\n", .{ channel, old_crc, crc });
+            print("HW Channel {d} after 8-byte chunk: 0x{x:0>8} -> 0x{x:0>8}\n", .{ channel, old_crc, crc });
         }
 
         while (i < buf.len) : (i += 1) {
@@ -183,11 +183,11 @@ fn hw_crc32c(init: u32, buf: []const u8) u32 {
                       [crc_in] "0" (crc),
                 );
             crc = result;
-            print(" HW Channel {d} byte {d} (0x{x:0>2}): 0x{x:0>8} -> 0x{x:0>8}\n", .{ channel, i, buf[i], old_crc, crc });
+            print("HW Channel {d} byte {d} (0x{x:0>2}): 0x{x:0>8} -> 0x{x:0>8}\n", .{ channel, i, buf[i], old_crc, crc });
         }
 
         results[channel] = ~crc;
-        print(" HW Channel {d} final result: 0x{x:0>8}\n", .{ channel, results[channel] });
+        print("HW Channel {d} final result: 0x{x:0>8}\n", .{ channel, results[channel] });
     }
 
     const final_crc = if (results[0] == results[1] or results[0] == results[2])
@@ -214,7 +214,7 @@ fn sw_crc32c(init: u32, buf: []const u8) u32 {
 
     for (0..TMR_CHANNELS) |channel| {
         var crc = ~init;
-        print(" Channel {d} initial crc=0x{x:0>8}\n", .{ channel, crc });
+        print("Channel {d} initial crc=0x{x:0>8}\n", .{ channel, crc });
 
         var i: usize = 0;
         while (i < buf.len) : (i += 1) {
@@ -222,11 +222,11 @@ fn sw_crc32c(init: u32, buf: []const u8) u32 {
             const byte = buf[i];
 
             crc = (crc >> 8) ^ crc_table[channel][(crc ^ byte) & 0xFF];
-            print(" Channel {d} byte {d} (0x{x:0>2}): 0x{x:0>8} -> 0x{x:0>8}\n", .{ channel, i, byte, old_crc, crc });
+            print("Channel {d} byte {d} (0x{x:0>2}): 0x{x:0>8} -> 0x{x:0>8}\n", .{ channel, i, byte, old_crc, crc });
         }
 
         results[channel] = ~crc;
-        print(" Channel {d} final result: 0x{x:0>8}\n", .{ channel, results[channel] });
+        print("Channel {d} final result: 0x{x:0>8}\n", .{ channel, results[channel] });
     }
 
     const final_crc = if (results[0] == results[1] or results[0] == results[2])
@@ -236,7 +236,7 @@ fn sw_crc32c(init: u32, buf: []const u8) u32 {
     else
         @panic("TMR voting failed - critical error");
 
-    print(" sw_crc32c final result: 0x{x:0>8}\n", .{final_crc});
+    print("sw_crc32c final result: 0x{x:0>8}\n", .{final_crc});
     return final_crc;
 }
 
@@ -253,16 +253,16 @@ pub fn crc32c(init: u32, buf: []const u8) u32 {
         @panic("Input exceeds safety limit");
     }
 
-    print("\n crc32c() called with init=0x{x:0>8}, buf='{s}'\n", .{ init, buf });
+    print("\ncrc32c() called with init=0x{x:0>8}, buf='{s}'\n", .{ init, buf });
 
     if (std.Target.x86.featureSetHas(builtin.cpu.features, .sse4_2)) {
-        print(" Using hardware CRC (SSE4.2)\n", .{});
+        print("Using hardware CRC (SSE4.2)\n", .{});
         return hw_crc32c(init, buf);
     } else if (std.Target.aarch64.featureSetHas(builtin.cpu.features, .crc)) {
-        print(" Using hardware CRC (ARM64)\n", .{});
+        print("Using hardware CRC (ARM64)\n", .{});
         return hw_crc32c(init, buf);
     }
-    print(" Using software CRC\n", .{});
+    print("Using software CRC\n", .{});
     return sw_crc32c(init, buf);
 }
 
@@ -301,14 +301,14 @@ test "crc32c/fault_tolerance" {
     {
         for (test_vectors) |vec| {
             const sw_result = sw_crc32c(0, vec.input);
-            print("[DEBUG] Software CRC value for '{s}': 0x{x:0>8} (expected: 0x{x:0>8})\n", .{ vec.input, sw_result, vec.expected });
+            print("Software CRC value for '{s}': 0x{x:0>8} (expected: 0x{x:0>8})\n", .{ vec.input, sw_result, vec.expected });
 
             try testing.expectEqual(vec.expected, sw_result);
 
             var sw_results: [TMR_CHANNELS]u32 = undefined;
             for (0..TMR_CHANNELS) |i| {
                 sw_results[i] = sw_crc32c(0, vec.input);
-                print("[DEBUG] Software Channel {d} result: 0x{x:0>8}\n", .{ i, sw_results[i] });
+                print("Software Channel {d} result: 0x{x:0>8}\n", .{ i, sw_results[i] });
                 try testing.expectEqual(sw_result, sw_results[i]);
             }
         }
@@ -317,18 +317,17 @@ test "crc32c/fault_tolerance" {
     if (std.Target.x86.featureSetHas(builtin.cpu.features, .sse4_2) or
         std.Target.aarch64.featureSetHas(builtin.cpu.features, .crc))
     {
-        print("\n[DEBUG] Testing hardware TMR...\n", .{});
 
         for (test_vectors) |vec| {
             const hw_result = hw_crc32c(0, vec.input);
-            print("[DEBUG] Hardware CRC value for '{s}': 0x{x:0>8} (expected: 0x{x:0>8})\n", .{ vec.input, hw_result, vec.expected });
+            print("Hardware CRC value for '{s}': 0x{x:0>8} (expected: 0x{x:0>8})\n", .{ vec.input, hw_result, vec.expected });
 
             try testing.expectEqual(vec.expected, hw_result);
 
             var hw_results: [TMR_CHANNELS]u32 = undefined;
             for (0..TMR_CHANNELS) |i| {
                 hw_results[i] = hw_crc32c(0, vec.input);
-                print("[DEBUG] Hardware Channel {d} result: 0x{x:0>8}\n", .{ i, hw_results[i] });
+                print("Hardware Channel {d} result: 0x{x:0>8}\n", .{ i, hw_results[i] });
                 try testing.expectEqual(hw_result, hw_results[i]);
             }
         }
@@ -340,7 +339,7 @@ test "crc32c/fault_tolerance" {
         for (test_vectors) |vec| {
             const hw_result = hw_crc32c(0, vec.input);
             const sw_result = sw_crc32c(0, vec.input);
-            print("[DEBUG] Vector '{s}' - HW: 0x{x:0>8}, SW: 0x{x:0>8}, Expected: 0x{x:0>8}\n", .{ vec.input, hw_result, sw_result, vec.expected });
+            print("Vector '{s}' - HW: 0x{x:0>8}, SW: 0x{x:0>8}, Expected: 0x{x:0>8}\n", .{ vec.input, hw_result, sw_result, vec.expected });
             try testing.expectEqual(vec.expected, hw_result);
             try testing.expectEqual(vec.expected, sw_result);
         }
@@ -353,15 +352,15 @@ test "crc32c/hardware_acceleration" {
     {
         const input = "test hardware acceleration";
         const sw_result = sw_crc32c(0, input);
-        print("\n Software CRC result: 0x{x:0>8}\n", .{sw_result});
+        print("\nSoftware CRC result: 0x{x:0>8}\n", .{sw_result});
 
         if (std.Target.x86.featureSetHas(builtin.cpu.features, .sse4_2)) {
             const hw_result = hw_crc32c(0, input);
-            print(" Hardware CRC result: 0x{x:0>8}\n", .{hw_result});
-            print(" CPU Features - SSE4.2: true\n", .{});
+            print("Hardware CRC result: 0x{x:0>8}\n", .{hw_result});
+            print("CPU Features - SSE4.2: true\n", .{});
             try testing.expectEqual(sw_result, hw_result);
         } else {
-            print(" CPU Features - SSE4.2: false\n", .{});
+            print("CPU Features - SSE4.2: false\n", .{});
         }
     }
 
