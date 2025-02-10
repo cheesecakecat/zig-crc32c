@@ -1,16 +1,5 @@
 //! A robust CRC32C implementation
 //!
-//! This implementation uses Intel's CRC32C polynomial (Castagnoli) with built-in
-//! hardware acceleration on modern processors. It's designed to be both fast and
-//! reliable, with special attention to fault tolerance through Triple Modular
-//! Redundancy (TMR).
-//!
-//! Performance (Debug Build):
-//! When running on x86_64 with SSE4.2, you can expect excellent performance,
-//! especially with larger buffers. The hardware implementation achieves around
-//! 4 cycles/byte for 4KB buffers, while the software implementation averages
-//! about 35 cycles/byte. These numbers improve by 3-5x in release builds.
-//!
 //! For best results keep your buffers at least 256 bytes in size and aligned to 64-byte boundaries.
 //! The hardware implementation really shines with larger buffers, while smaller ones
 //! might not see the full performance benefit.
@@ -243,7 +232,7 @@ fn sw_crc32c(init: u32, buf: []const u8) u32 {
 /// Calculates a CRC32C hash.
 ///
 /// This is probably the function you want to use for CRC32C calculations. It automatically
-/// picks the best implementation for your hardware and includes fault tolerance features.
+/// picks the best implementation for your hardware.
 ///
 /// Each calculation runs through three independent channels and uses majority
 /// voting to ensure correctness. This means your hash remains accurate even
