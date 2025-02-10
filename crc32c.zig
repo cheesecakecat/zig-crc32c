@@ -1,4 +1,4 @@
-//! A robust CRC32C implementation featuring hardware acceleration and fault tolerance
+//! A robust CRC32C implementation
 //!
 //! This implementation uses Intel's CRC32C polynomial (Castagnoli) with built-in
 //! hardware acceleration on modern processors. It's designed to be both fast and
@@ -11,14 +11,9 @@
 //! 4 cycles/byte for 4KB buffers, while the software implementation averages
 //! about 35 cycles/byte. These numbers improve by 3-5x in release builds.
 //!
-//!
 //! For best results keep your buffers at least 256 bytes in size and aligned to 64-byte boundaries.
 //! The hardware implementation really shines with larger buffers, while smaller ones
 //! might not see the full performance benefit.
-//!
-//! A quick note on debugging: This implementation includes detailed debug output
-//! that's automatically stripped in release builds, so you can safely use it
-//! in performance-critical code.
 
 const std = @import("std");
 const builtin = @import("builtin");
